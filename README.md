@@ -8,7 +8,9 @@ methods are in the process of being added.
 Installation
 ============
 
-`gem install pactrac`
+```bash
+gem install pactrac
+```
 
 CLI
 ===
@@ -19,11 +21,15 @@ The binary `pactrac` is included with the gem, usable from the command line.
 
 If not specified, the carrier company is guessed.
 
-`$ pactrac track 1234567890`
+```bash
+$ pactrac track 1234567890
+```
 
 ### Specifying carrier
 
-`$ pactrac track 1234567890 --carrier Dhl`
+```bash
+$ pactrac track 1234567890 --carrier Dhl
+```
 
 ### Verifying the request
 
@@ -31,7 +37,7 @@ Some shipping carriers, such as EMS, require CAPTCHA style verifications.  The
 CLI allows for this by downloading the CAPTCHA image to a temporary directory,
 and allowing you to run the command again adding your verification input.
 
-```
+```bash
 $ be pactrac track EE123456789CN
 EMS requires verification, please view the image at
 file:///tmp/pactrac_1345961387_ems.jpg and run pactrac again using the following
@@ -58,14 +64,16 @@ will be populated with an error message.
 
 ### Discover a carrier based on a tracking number
 
-`PacTrac::Carrier.for_tracking_number('EE123456789')`
+```ruby
+PacTrac::Carrier.for_tracking_number('EE123456789')
+```
 
 Returns a pair of values, the first an Err struct, the second is the
 corresponding carrier module.
 
 ### Request tracking information
 
-```
+```ruby
 require 'pactrac'
 
 carrier = PacTrac::Carrier.for_tracking_number('1234567890')
@@ -95,7 +103,7 @@ After manually checking the verification image, a second request is made to the
 server.  The cookies from the previous request need to be sent to the new
 request.
 
-```
+```ruby
 require 'pactrac'
 require 'pactrac/http/cookie'
 
