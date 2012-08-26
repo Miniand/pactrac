@@ -1,0 +1,107 @@
+#!/usr/bin/ruby
+require 'pactrac'
+require 'pactrac/http/cookie'
+require 'terminal-table'
+require 'commander/import'
+require 'shellwords'
+require 'colorize'
+
+program :name, 'PacTrac'
+program :version, '0.0.1'
+program :description, 'Internation package tracker in Ruby'
+
+command :track do |c|
+  c.syntax = 'pactrac track <tracking_number> [options]'
+  c.description = 'Track a package by tracking number'
+  c.option '--carrier STRING', String,
+    'Specify the carrier, otherwise carrier is detected'
+  c.option '--cookie STRING', String,
+    'Specify cookie data to set when verifying'
+  c.option '--verify STRING', String,
+    'Specify the verification string'
+  c.action do |args, options|
+    tracking_number = args.first
+    if tracking_number.nil?
+      $stderr.puts("Please specify a tracking number".red)
+      exit(1)
+    end
+    carrier = nil
+    if options.carrier.nil?
+      err, carrier = PacTrac::Carrier.for_tracking_number(
+        tracking_number)
+      unless err.valid
+        $stderr.puts(
+          "Could not match to a carrier, please specify with --carrier".red)
+        exit(2)
+      end
+    else
+      begin
+        carrier = PacTrac::Carrier.const_get(options.carrier)
+      rescue
+        $stderr.puts("No carrier with the name #{options.carrier}".red)
+        exit(3)
+      end
+    end
+    session = carrier.start_session
+    if options.verify.nil?
+      err, resp = carrier.tracking_request(tracking_number, session)
+    else
+      unless options.cookie.nil?
+        session.cookies = PacTrac::Http::Cookie.from_request_header_value(
+          options.cookie)
+      end
+      err, resp = carrier.verify(tracking_number, options.verify, session)
+    end
+    unless err.valid
+      $stderr.puts("Error requesting tracking data: #{err.msg}".red)
+      exit(4)
+    end
+    if resp.requires_verification
+      $stdout.puts("#{carrier.title} requires verification, please view the " +
+        "image at #{resp.verification_image.green} and run pactrac again " +
+        "using the following command:")
+      $stdout.puts
+      cookies = PacTrac::Http::Cookie.from_response(resp)
+      cookies_string = cookies.length == 0 ? '' : ' --cookie ' +
+        Shellwords.escape(PacTrac::Http::Cookie.to_request_header_value(
+          cookies))
+      $stdout.puts("pactrac track #{Shellwords.escape(tracking_number)
+        } --carrier #{carrier.name.split('::').last}#{cookies_string
+        } --verify " + "YOUR_VERIFICATION_HERE".green)
+      exit(5)
+    else
+      err, tracking_data = carrier.parse_tracking_data(resp)
+      unless err.valid
+        $stderr.puts("Error parsing tracking data: #{err.msg}".red)
+        exit(6)
+      end
+    end
+
+    # Discovers headings from updates
+    headings = [ :at, :location, :message ]
+    tracking_data[:updates].each do |u|
+      u.keys.each do |key|
+        headings << key unless headings.include?(key)
+      end
+    end
+    rows = tracking_data[:updates].sort_by { |u| u[:at] }.reverse.map do |u|
+      headings.map { |heading| u[heading] }
+    end
+
+    PacTrac::Http::Session.finish(session)
+    $stdout.puts("Tracking number: #{tracking_number}")
+    $stdout.puts("Carrier: #{carrier.title}")
+    unless tracking_data[:origin].nil?
+      $stdout.puts("Origin: #{tracking_data[:origin]}")
+    end
+    unless tracking_data[:destination].nil?
+      $stdout.puts("Destination: #{tracking_data[:destination]}")
+    end
+    $stdout.puts
+
+    puts Terminal::Table.new(:headings => headings.map { |h|
+      h.to_s.capitalize }, :rows => rows)
+  end
+end
+
+default_command :help
