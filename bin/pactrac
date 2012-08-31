@@ -7,7 +7,7 @@ require 'shellwords'
 require 'colorize'
 
 program :name, 'PacTrac'
-program :version, '0.0.1'
+program :version, '0.0.2'
 program :description, 'Internation package tracker in Ruby'
 
 command :track do |c|

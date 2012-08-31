@@ -1,5 +1,6 @@
 require 'pactrac/carrier/dhl'
 require 'pactrac/carrier/ems'
+require 'pactrac/carrier/china_post'
 require 'pactrac/err'
 
 module PacTrac
@@ -7,7 +8,7 @@ module PacTrac
     module_function
 
     def all
-      [Carrier::Dhl, Carrier::Ems]
+      [Carrier::Dhl, Carrier::Ems, Carrier::ChinaPost]
     end
 
     def for_tracking_number(tracking_number)
