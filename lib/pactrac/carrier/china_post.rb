@@ -75,8 +75,9 @@ module PacTrac
             :message => cells[2].text.strip,
           }
         end
-        return Err.new(false, "unable to extract any tracking data, " +
-          err.msg) if tracking_data[:updates].empty?
+        if tracking_data[:updates].empty?
+          return Err.new(false, "unable to extract any tracking data")
+        end
         return Err.new(true), tracking_data
       end
 

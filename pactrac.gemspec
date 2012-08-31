@@ -1,7 +1,7 @@
 Gem::Specification.new do |s|
   s.name        = 'pactrac'
-  s.version     = '0.0.2'
-  s.date        = '2012-08-23'
+  s.version     = '0.0.3'
+  s.date        = '2012-08-31'
   s.summary     = "pactrac"
   s.description = "International package tracking for Ruby"
   s.authors     = ["Michael Alexander"]
