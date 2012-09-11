@@ -18,7 +18,7 @@ module PacTrac
       end
 
       def tracking_number_relevant?(tracking_number)
-        tracking_number.strip.match(/^RA\d+CN$/)
+        tracking_number.strip.match(/^R[AR]\d+CN$/)
       end
 
       def tracking_request(tracking_number, session)
