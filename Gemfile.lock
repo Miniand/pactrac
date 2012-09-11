@@ -1,7 +1,7 @@
 PATH
   remote: .
   specs:
-    pactrac (0.0.2)
+    pactrac (0.0.4)
       colorize (~> 0.5.8)
       commander (~> 4.1.2)
       nokogiri (~> 1.5.5)

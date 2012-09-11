@@ -58,7 +58,11 @@ module PacTrac
             first_cell = cells.first
             case
             when first_cell.name == 'th' # Date cell
-              current_date = Date.parse(first_cell.content)
+              if first_cell.content.empty?
+                current_date = Date.today
+              else
+                current_date = Date.parse(first_cell.content)
+              end
             when first_cell.attribute('class').to_s != 'emptyRow'
               next if current_date.nil?
               tracking_data[:updates] << {
